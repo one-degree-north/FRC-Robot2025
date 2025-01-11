@@ -39,11 +39,11 @@ public class CoralMechCommands extends Command {
                 return;
         }
         // Execute initial state transition
-        Commands.run(() -> coralMech.coralStateTransition(initialState), coralMech)
+        Commands.run(() -> coralMech.coralTransitionHandler(initialState), coralMech)
             .alongWith(Commands.waitUntil(coralMech::isWristAtSetpoint))
             .andThen(() -> {
               if (finalState != null) { //for DOCKED case finalState is null
-                  coralMech.coralStateTransition(finalState);
+                  coralMech.coralTransitionHandler(finalState);
               }
           })
             .schedule();

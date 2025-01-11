@@ -13,6 +13,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -23,17 +25,21 @@ public class CoralMech extends SubsystemBase {
   private TalonFX m_leftRoller;
   private TalonFX m_rightRoller;
   private TalonFX m_krakenWrist;
+
   private VoltageOut voltageOut = new VoltageOut(0);
   private MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0).withSlot(0);
+  private CoralStates currentState;
+  private DigitalInput m_zeroSwitch;
+
   private boolean isWristEncoderReset;
-  private CoralStates currentState = CoralStates.WRIST_DOCKED;
 
   /** Creates a new CoralMech. */
-  public CoralMech() {
+  public CoralMech(DigitalInput zeroSwitch) {
     setName("CoralMech");
     m_leftRoller = new TalonFX(CoralConstants.leftRollerID, "rio");
     m_rightRoller = new TalonFX(CoralConstants.rightRollerID, "rio");
     m_krakenWrist = new TalonFX(CoralConstants.wristRollerID, "rio");
+    m_zeroSwitch = zeroSwitch;
     motorConfigurations();
   }
 
@@ -50,50 +56,58 @@ public class CoralMech extends SubsystemBase {
     .withSlot0(MotorConfigs.getSlot0Configs(
       CoralConstants.wristkP, CoralConstants.wristkI, CoralConstants.wristkD, CoralConstants.wristkS,
       CoralConstants.wristkV, CoralConstants.wristkA,0))
-    .withFeedback(MotorConfigs.getFeedbackConfigs(CoralConstants.wristMechanismRatio));
+    .withFeedback(MotorConfigs.getFeedbackConfigs(CoralConstants.wristMechanismRatio))
+    .withMotionMagic(MotorConfigs.geMotionMagicConfigs(CoralConstants.wristMMAcceleration,
+     CoralConstants.wristMMCruiseVelocity, CoralConstants.wristMMJerk));
     
     m_leftRoller.getConfigurator().apply(rollerConfigs);
     m_rightRoller.getConfigurator().apply(rollerConfigs);
     m_krakenWrist.getConfigurator().apply(wristConfigs);
   }
 
-  public boolean isWristEncoderReset(){
-    return isWristEncoderReset;
-  }
+public boolean isWristEncoderReset(){
+  return isWristEncoderReset;
+}
 
-  private void setControl(TalonFX motor, ControlRequest req) {
-    if (motor.isAlive() && isWristEncoderReset) {
-        motor.setControl(req);
-    }
+private void setControl(TalonFX motor, ControlRequest req) {
+  if (motor.isAlive() && isWristEncoderReset) {
+    motor.setControl(req);
+  }
 }
 
 public void setBothRollersVoltage(double voltage) {
-    setControl(m_leftRoller, voltageOut.withOutput(voltage));
-    setControl(m_rightRoller, voltageOut.withOutput(voltage));
+  setControl(m_leftRoller, voltageOut.withOutput(voltage));
+  setControl(m_rightRoller, voltageOut.withOutput(voltage));
 }
 
 private void stopMotor(TalonFX motor) {
-    motor.stopMotor();
+  motor.stopMotor();
+}
+
+private void zeroWrist(){
+  m_krakenWrist.setPosition(0).isOK();
+  currentState = CoralStates.WRIST_DOCKED;
 }
 
 private double getRollerVelocity(TalonFX motor) {
-    return motor.getVelocity().getValueAsDouble();
+  return motor.getVelocity().getValueAsDouble();
 }
 
 public Boolean isWristAtSetpoint() {
-    return Math.abs(m_krakenWrist.getPosition().getValueAsDouble() -
-            currentState.getSetpointValue()) < CoralConstants.wristAllowedError;
+  return Math.abs(m_krakenWrist.getPosition().getValueAsDouble() -
+    currentState.getSetpointValue()) < CoralConstants.wristAllowedError;
 }
 
-public void coralStateTransition(CoralStates wantedState) {
+public void coralTransitionHandler(CoralStates wantedState) {
     switch (wantedState) {
-        case ROLLER_INTAKE, ROLLER_OUTTAKE -> setBothRollersVoltage(wantedState.getSetpointValue());
+        case ROLLER_INTAKE, ROLLER_OUTTAKE -> 
+          setBothRollersVoltage(wantedState.getSetpointValue());
         case ROLLER_L1OUTAKE -> {
-            setControl(m_leftRoller, voltageOut.withOutput(CoralStates.ROLLER_OUTTAKE.getSetpointValue()));
-            stopMotor(m_rightRoller);
+          setControl(m_leftRoller, voltageOut.withOutput(CoralStates.ROLLER_OUTTAKE.getSetpointValue()));
+          stopMotor(m_rightRoller);
         }
         case WRIST_REEF, WRIST_HP, WRIST_DOCKED -> 
-            setControl(m_krakenWrist, motionMagicVoltage.withPosition(wantedState.getSetpointValue()));
+          setControl(m_krakenWrist, motionMagicVoltage.withPosition(wantedState.getSetpointValue()));
     }
     currentState = wantedState;
 }
@@ -109,11 +123,16 @@ private final SysIdRoutine coralWristCharacterization =
 
   @Override
   public void periodic() {
+    if (DriverStation.isDisabled() && m_krakenWrist.isAlive()){
+      if (m_zeroSwitch.get()){
+        zeroWrist();
+      }
+    }
     SmartDashboard.putBoolean("IsWristEncoderReset?", isWristEncoderReset);
+    SmartDashboard.putBoolean("IsWristAtSetpoint?", isWristAtSetpoint());
     SmartDashboard.putNumber("LeftRollerVelocity", getRollerVelocity(m_leftRoller));
     SmartDashboard.putNumber("RightRollerVelocity", getRollerVelocity(m_rightRoller));
-    SmartDashboard.putString("CurrentState", currentState.name());
-    SmartDashboard.putBoolean("IsWristAtSetpoint?", isWristAtSetpoint());
+    SmartDashboard.putString("CoralState", currentState.name());
   }
   
   public enum CoralStates {
@@ -127,11 +146,11 @@ private final SysIdRoutine coralWristCharacterization =
     private final double setpointValue;
 
     CoralStates(double setpointValue) {
-        this.setpointValue = setpointValue;
+      this.setpointValue = setpointValue;
     }
 
     public double getSetpointValue() {
-        return setpointValue;
+      return setpointValue;
     }
 }
 }
