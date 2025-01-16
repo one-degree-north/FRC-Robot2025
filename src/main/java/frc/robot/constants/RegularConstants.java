@@ -39,6 +39,7 @@ public class RegularConstants {
     }
 
     public static final class AlgaeConstants{
+        public static final int beamBreakID = 0;
         public static int leftFlywheelID = 0;
         public static int rightFlywheelID = 0;
         public static int innerRollersID = 0;
