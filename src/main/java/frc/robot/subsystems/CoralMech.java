@@ -32,6 +32,7 @@ public class CoralMech extends SubsystemBase {
   private DigitalInput m_zeroSwitch;
 
   private boolean isWristEncoderReset;
+  public static boolean isCoralIntaked;
 
   /** Creates a new CoralMech. */
   public CoralMech(DigitalInput zeroSwitch) {
@@ -100,13 +101,17 @@ public Boolean isWristAtSetpoint() {
 
 public void coralTransitionHandler(CoralStates wantedState) {
     switch (wantedState) {
-        case ROLLER_INTAKE, ROLLER_OUTTAKE -> 
+        case ROLLER_INTAKE:
           setBothRollersVoltage(wantedState.getSetpointValue());
-        case ROLLER_L1OUTAKE -> {
+          isCoralIntaked = true;
+        case ROLLER_OUTTAKE:
+          setBothRollersVoltage(wantedState.getSetpointValue());
+          isCoralIntaked = false;
+        case ROLLER_L1OUTAKE:
           setControl(m_leftRoller, voltageOut.withOutput(CoralStates.ROLLER_OUTTAKE.getSetpointValue()));
           stopMotor(m_rightRoller);
-        }
-        case WRIST_REEF, WRIST_HP, WRIST_DOCKED -> 
+        
+        case WRIST_REEF, WRIST_HP, WRIST_DOCKED:
           setControl(m_krakenWrist, motionMagicVoltage.withPosition(wantedState.getSetpointValue()));
     }
     currentState = wantedState;

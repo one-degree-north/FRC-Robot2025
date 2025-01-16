@@ -91,7 +91,7 @@ private void stopMotor(TalonFX motor) {
   motor.stopMotor();
 }
 
-private void zeroPivot(){
+private void zeroPivot(){ 
   m_leftPivot.setPosition(0).isOK();
   m_rightPivot.setPosition(0).isOK();
   currentState = AlgaeStates.PIVOT_DOCK_SHOOT;

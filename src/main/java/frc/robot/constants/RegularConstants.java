@@ -12,6 +12,11 @@ public class RegularConstants {
         public static final int zeroSwitchID = 0;
     }
 
+    public static final class LEDConstants {
+        public static final int ledID = 0;
+        public static final int ledLength = 0;
+    }
+
     public static final class CoralConstants {
         public static int leftRollerID = 0;
         public static int rightRollerID = 0;
