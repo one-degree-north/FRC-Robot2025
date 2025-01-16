@@ -78,4 +78,53 @@ public class RegularConstants {
         public static double flywheelMechanismRatio = 1/12;
         public static double pivotAllowedError = 0.05;
     }
+
+    public static final class ElevatorConstants {
+        public static int leftElevatorID = 0;
+        public static int rightElevatorID = 0;
+        public static int elevatorEncoderID = 0;
+        public static int magneticLimitSwitchID = 0;
+
+        public static double elevatorUpVoltage = 0;
+        public static double elevatorDownVoltage = 0;
+        public static double elevatorDockedPos = 0;
+        public static double elevatorL1Pos = 0;
+        public static double elevatorL2Pos = 0;
+        public static double elevatorL3Pos = 0;
+        public static double elevatorL4Pos = 0;
+
+
+        public static double leftElevatorkP = 0;
+        public static double leftElevatorkI = 0;
+        public static double leftElevatorkD = 0;
+        public static double leftElevatorkS = 0;
+        public static double leftElevatorkV = 0;
+        public static double leftElevatorkA = 0;
+        public static double leftElevatorkG = 0;
+
+        public static double leftElevatorMechanismRatio = 1/12;
+
+        public static double leftElevatorMMAcceleration = 0;
+        public static double leftElevatorMMCruiseVelocity = 0;
+        public static double leftElevatorMMJerk = 0;
+
+        public static double rightElevatorkP = 0;
+        public static double rightElevatorkI = 0;
+        public static double rightElevatorkD = 0;
+        public static double rightElevatorkS = 0;
+        public static double rightElevatorkV = 0;
+        public static double rightElevatorkA = 0;
+        public static double rightElevatorkG = 0;
+
+        public static double rightElevatorMechanismRatio = 1/12;
+
+        public static double rightElevatorMMAcceleration = 0;
+        public static double rightElevatorMMCruiseVelocity = 0;
+        public static double rightElevatorMMJerk = 0;
+
+
+
+    }
+
+
 }
