@@ -59,10 +59,10 @@ public class Elevator extends SubsystemBase {
       .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
         NeutralModeValue.Brake, InvertedValue))
       .withSlot0(MotorConfigs.getSlot0Configs(
-        ElevatorConstants.leftElevatorkP, ElevatorConstants.leftElevatorkI, ElevatorConstants.leftElevatorkD, ElevatorConstants.leftElevatorkS, ElevatorConstants.leftElevatorkV, ElevatorConstants.leftElevatorkA, ElevatorConstants.leftElevatorkG))
-      .withFeedback(MotorConfigs.getFeedbackConfigs(ElevatorConstants.leftElevatorMechanismRatio))
-      .withMotionMagic(MotorConfigs.geMotionMagicConfigs(ElevatorConstants.leftElevatorMMAcceleration,
-       ElevatorConstants.leftElevatorMMCruiseVelocity, ElevatorConstants.leftElevatorMMJerk));
+        ElevatorConstants.ElevatorkP, ElevatorConstants.ElevatorkI, ElevatorConstants.ElevatorkD, ElevatorConstants.ElevatorkS, ElevatorConstants.ElevatorkV, ElevatorConstants.ElevatorkA, ElevatorConstants.ElevatorkG))
+      .withFeedback(MotorConfigs.getFeedbackConfigs(ElevatorConstants.ElevatorMechanismRatio))
+      .withMotionMagic(MotorConfigs.geMotionMagicConfigs(ElevatorConstants.ElevatorMMAcceleration,
+       ElevatorConstants.ElevatorMMCruiseVelocity, ElevatorConstants.ElevatorMMJerk));
        return elevatorConfigs;
   }
  
@@ -88,9 +88,9 @@ public class Elevator extends SubsystemBase {
     currentState = ElevatorStates.ELEVATOR_DOCKED;
   }
 
-  public Boolean isElevatorAtSetpoint() { // FIX
+  public Boolean isElevatorAtSetpoint() {
     return Math.abs(m_elevatorEncoder.get() -
-      currentState.getSetpointValue()) < CoralConstants.wristAllowedError;
+      currentState.getSetpointValue()) < ElevatorConstants.wristAllowedError;
   }
   
 
