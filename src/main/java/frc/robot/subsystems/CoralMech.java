@@ -41,10 +41,10 @@ public class CoralMech extends SubsystemBase {
     m_rightRoller = new TalonFX(CoralConstants.rightRollerID, "rio");
     m_krakenWrist = new TalonFX(CoralConstants.wristRollerID, "rio");
     m_zeroSwitch = zeroSwitch;
-    motorConfigurations();
+    configureMotors();
   }
 
-  private void motorConfigurations(){
+  private void configureMotors(){
     TalonFXConfiguration rollerConfigs = new TalonFXConfiguration()
     .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("Falcon500"))
     .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
@@ -85,8 +85,14 @@ private void stopMotor(TalonFX motor) {
   motor.stopMotor();
 }
 
+public void stopAllMotors(){
+  stopMotor(m_leftRoller);
+  stopMotor(m_rightRoller);
+  stopMotor(m_krakenWrist);
+}
+
 private void zeroWrist(){
-  m_krakenWrist.setPosition(0).isOK();
+  m_krakenWrist.setPosition(0);
   currentState = CoralStates.WRIST_DOCKED;
 }
 
@@ -104,15 +110,18 @@ public void coralTransitionHandler(CoralStates wantedState) {
         case ROLLER_INTAKE:
           setBothRollersVoltage(wantedState.getSetpointValue());
           isCoralIntaked = true;
+          break;
         case ROLLER_OUTTAKE:
           setBothRollersVoltage(wantedState.getSetpointValue());
           isCoralIntaked = false;
+          break;
         case ROLLER_L1OUTAKE:
           setControl(m_leftRoller, voltageOut.withOutput(CoralStates.ROLLER_OUTTAKE.getSetpointValue()));
           stopMotor(m_rightRoller);
-        
+          break;
         case WRIST_REEF, WRIST_HP, WRIST_DOCKED:
           setControl(m_krakenWrist, motionMagicVoltage.withPosition(wantedState.getSetpointValue()));
+          break;
     }
     currentState = wantedState;
 }

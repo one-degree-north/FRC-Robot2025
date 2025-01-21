@@ -16,9 +16,9 @@ public class CoralMechCommands extends Command {
         this.commandType = commandType;
         addRequirements(coralMech);
     }
-
     @Override
     public void initialize() {
+        // Set initial and final states based on the command type
         switch (commandType) {
             case DOCKED:
                 initialState = CoralStates.WRIST_DOCKED;
@@ -38,31 +38,31 @@ public class CoralMechCommands extends Command {
             default:
                 return;
         }
+    
         // Execute initial state transition
-        Commands.run(() -> coralMech.coralTransitionHandler(initialState), coralMech)
-            .alongWith(Commands.waitUntil(coralMech::isWristAtSetpoint))
-            .andThen(() -> {
-              if (finalState != null) { //for DOCKED case finalState is null
-                  coralMech.coralTransitionHandler(finalState);
-              }
-          })
-            .schedule();
+        coralMech.coralTransitionHandler(initialState);
     }
-
+    
+    @Override
+    public void execute() {
+        if (finalState != null && coralMech.isWristAtSetpoint()) {
+            coralMech.coralTransitionHandler(finalState);
+        }
+    }
+    
     @Override
     public boolean isFinished() {
-        return switch (commandType) {
-            case DOCKED, REEFOUTTAKE, LVL1OUTTAKE -> coralMech.isWristAtSetpoint();
-            default -> false;
-        };
+        return coralMech.isWristAtSetpoint();
     }
-
+    
     @Override
     public void end(boolean interrupted) {
         if (commandType != CoralCommands.DOCKED) {
             coralMech.setBothRollersVoltage(0);
+            coralMech.stopAllMotors();
         }
     }
+    
 
     public enum CoralCommands {
         DOCKED,
