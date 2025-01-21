@@ -117,7 +117,7 @@ public void coralTransitionHandler(CoralStates wantedState) {
     currentState = wantedState;
 }
 
-private final SysIdRoutine coralWristCharacterization =
+private final SysIdRoutine coralWristCharacterization = 
   new SysIdRoutine(
     new SysIdRoutine.Config(),
     new SysIdRoutine.Mechanism((Voltage volts) -> m_krakenWrist.setControl(voltageOut.withOutput(volts)), 

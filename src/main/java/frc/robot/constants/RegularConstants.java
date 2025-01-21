@@ -10,6 +10,7 @@ public class RegularConstants {
     public static final class MiscConstants {
         public static final int controllerID = 0;
         public static final int zeroSwitchID = 0;
+        public static final String cameraName = "camera";
     }
 
     public static final class LEDConstants {
