@@ -49,30 +49,21 @@ public class Elevator extends SubsystemBase {
   }
 
   private void motorConfigurations(){
-    
-    TalonFXConfiguration leftElevatorConfigs = new TalonFXConfiguration()
-    .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("KrakenX60"))
-    .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
-      NeutralModeValue.Brake, InvertedValue.Clockwise_Positive))
-    .withSlot0(MotorConfigs.getSlot0Configs(
-      ElevatorConstants.leftElevatorkP, ElevatorConstants.leftElevatorkI, ElevatorConstants.leftElevatorkD, ElevatorConstants.leftElevatorkS, ElevatorConstants.leftElevatorkV, ElevatorConstants.leftElevatorkA, ElevatorConstants.leftElevatorkG))
-    .withFeedback(MotorConfigs.getFeedbackConfigs(ElevatorConstants.leftElevatorMechanismRatio))
-    .withMotionMagic(MotorConfigs.geMotionMagicConfigs(ElevatorConstants.leftElevatorMMAcceleration,
-     ElevatorConstants.leftElevatorMMCruiseVelocity, ElevatorConstants.leftElevatorMMJerk));
+      m_leftElevatorMotor.getConfigurator().apply(motorConfigurationInverted(InvertedValue.Clockwise_Positive));
+      m_rightElevatorMotor.getConfigurator().apply(motorConfigurationInverted(InvertedValue.CounterClockwise_Positive));
+  }
 
-     TalonFXConfiguration rightElevatorConfigs = new TalonFXConfiguration()
-     .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("KrakenX60"))
-     .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
-       NeutralModeValue.Brake, InvertedValue.Clockwise_Positive))
-     .withSlot0(MotorConfigs.getSlot0Configs(
-       ElevatorConstants.rightElevatorkP, ElevatorConstants.rightElevatorkI, ElevatorConstants.rightElevatorkD, ElevatorConstants.rightElevatorkS, ElevatorConstants.rightElevatorkV, ElevatorConstants.rightElevatorkA, ElevatorConstants.rightElevatorkG))
-     .withFeedback(MotorConfigs.getFeedbackConfigs(ElevatorConstants.rightElevatorMechanismRatio))
-     .withMotionMagic(MotorConfigs.geMotionMagicConfigs(ElevatorConstants.rightElevatorMMAcceleration,
-      ElevatorConstants.rightElevatorMMCruiseVelocity, ElevatorConstants.rightElevatorMMJerk));
-
-      m_leftElevatorMotor.getConfigurator().apply(leftElevatorConfigs);
-      m_rightElevatorMotor.getConfigurator().apply(rightElevatorConfigs);
-
+  private TalonFXConfiguration motorConfigurationInverted (InvertedValue InvertedValue){
+      TalonFXConfiguration elevatorConfigs = new TalonFXConfiguration()
+      .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("KrakenX60"))
+      .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
+        NeutralModeValue.Brake, InvertedValue))
+      .withSlot0(MotorConfigs.getSlot0Configs(
+        ElevatorConstants.leftElevatorkP, ElevatorConstants.leftElevatorkI, ElevatorConstants.leftElevatorkD, ElevatorConstants.leftElevatorkS, ElevatorConstants.leftElevatorkV, ElevatorConstants.leftElevatorkA, ElevatorConstants.leftElevatorkG))
+      .withFeedback(MotorConfigs.getFeedbackConfigs(ElevatorConstants.leftElevatorMechanismRatio))
+      .withMotionMagic(MotorConfigs.geMotionMagicConfigs(ElevatorConstants.leftElevatorMMAcceleration,
+       ElevatorConstants.leftElevatorMMCruiseVelocity, ElevatorConstants.leftElevatorMMJerk));
+       return elevatorConfigs;
   }
  
 
@@ -108,12 +99,14 @@ public class Elevator extends SubsystemBase {
   }
 
 
-  public void coralTransitionHandler(ElevatorStates wantedState) {
+  public void elevatorTransitionHandler(ElevatorStates wantedState) {
     switch (wantedState) {
-        case ELEVATOR_UP, ELEVATOR_DOWN -> 
+        case ELEVATOR_UP, ELEVATOR_DOWN:
           setElevatorMotorsVoltage(wantedState.getSetpointValue()); //Does this need to change positive/negative for going up and down
-        case ELEVATOR_DOCKED, ELEVATOR_L1, ELEVATOR_L2, ELEVATOR_L3, ELEVATOR_L4 -> 
+        case ELEVATOR_DOCKED, ELEVATOR_L1, ELEVATOR_L2, ELEVATOR_L3, ELEVATOR_L4:
           setControl(m_leftElevatorMotor, motionMagicVoltage.withPosition(wantedState.getSetpointValue()));
+          setControl(m_rightElevatorMotor, motionMagicVoltage.withPosition(wantedState.getSetpointValue()));
+          
     }
     currentState = wantedState;
 }
