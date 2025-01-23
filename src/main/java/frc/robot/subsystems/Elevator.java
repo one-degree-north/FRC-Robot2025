@@ -21,9 +21,7 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.MotorConfigs;
-import frc.robot.constants.RegularConstants.CoralConstants;
 import frc.robot.constants.RegularConstants.ElevatorConstants;
-import frc.robot.subsystems.CoralMech.CoralStates;
 
 public class Elevator extends SubsystemBase {
   private TalonFX m_leftElevatorMotor;
@@ -59,7 +57,8 @@ public class Elevator extends SubsystemBase {
       .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
         NeutralModeValue.Brake, InvertedValue))
       .withSlot0(MotorConfigs.getSlot0Configs(
-        ElevatorConstants.ElevatorkP, ElevatorConstants.ElevatorkI, ElevatorConstants.ElevatorkD, ElevatorConstants.ElevatorkS, ElevatorConstants.ElevatorkV, ElevatorConstants.ElevatorkA, ElevatorConstants.ElevatorkG))
+        ElevatorConstants.ElevatorkP, ElevatorConstants.ElevatorkI, ElevatorConstants.ElevatorkD, 
+        ElevatorConstants.ElevatorkS, ElevatorConstants.ElevatorkV, ElevatorConstants.ElevatorkA, ElevatorConstants.ElevatorkG))
       .withFeedback(MotorConfigs.getFeedbackConfigs(ElevatorConstants.ElevatorMechanismRatio))
       .withMotionMagic(MotorConfigs.geMotionMagicConfigs(ElevatorConstants.ElevatorMMAcceleration,
        ElevatorConstants.ElevatorMMCruiseVelocity, ElevatorConstants.ElevatorMMJerk));
@@ -113,7 +112,7 @@ public class Elevator extends SubsystemBase {
 
 public enum ElevatorStates {
   ELEVATOR_UP(ElevatorConstants.elevatorUpVoltage),
-  ELEVATOR_DOWN(ElevatorConstants.elevatorDownVoltage),
+  ELEVATOR_DOWN(-ElevatorConstants.elevatorUpVoltage),
   ELEVATOR_DOCKED(ElevatorConstants.elevatorDockedPos),
   ELEVATOR_L1(ElevatorConstants.elevatorL1Pos),
   ELEVATOR_L2(ElevatorConstants.elevatorL2Pos),

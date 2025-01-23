@@ -86,7 +86,6 @@ public class RegularConstants {
         public static int magneticLimitSwitchID = 0;
 
         public static double elevatorUpVoltage = 0;
-        public static double elevatorDownVoltage = 0;
         public static double elevatorDockedPos = 0;
         public static double elevatorL1Pos = 0;
         public static double elevatorL2Pos = 0;
