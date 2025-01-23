@@ -10,7 +10,7 @@ public class RegularConstants {
     public static final class MiscConstants {
         public static final int controllerID = 0;
         public static final int zeroSwitchID = 0;
-        public static final String cameraName = "camera";
+        public static final String cameraName = "Winston4817";
     }
 
     public static final class LEDConstants {
@@ -18,6 +18,11 @@ public class RegularConstants {
         public static final int ledLength = 0;
     }
 
+    public static final class ClimbConstants {
+        public static final int climbMotorID = 0;
+        public static final double climbVoltageOut = 0;
+        public static final double climbMechanismRatio = 0;
+    }
     public static final class CoralConstants {
         public static int leftRollerID = 0;
         public static int rightRollerID = 0;
