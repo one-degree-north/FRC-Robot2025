@@ -37,13 +37,12 @@ public class CoralMechCommands extends Command {
             default:
                 return;
         }
-    
-        // Execute initial state transition
-        coralMech.coralTransitionHandler(initialState);
     }
     
     @Override
+    //use commands. to fix this
     public void execute() {
+        coralMech.coralTransitionHandler(initialState);
         if (finalState != null && coralMech.isWristAtSetpoint()) {
             coralMech.coralTransitionHandler(finalState);
         }
