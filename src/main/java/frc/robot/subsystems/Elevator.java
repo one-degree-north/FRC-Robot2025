@@ -38,12 +38,13 @@ public class Elevator extends SubsystemBase {
 
 
   /** Creates a new Elevator. */
-  public Elevator() {
+  public Elevator(DigitalInput zeroSwitch) {
     setName("Elevator");
     m_leftElevatorMotor = new TalonFX(ElevatorConstants.leftElevatorID, "rio");
     m_rightElevatorMotor = new TalonFX(ElevatorConstants.rightElevatorID, "rio");
     m_elevatorEncoder = new DutyCycleEncoder(ElevatorConstants.elevatorEncoderID);
     bottomLimitSwitch = new DigitalInput(ElevatorConstants.magneticLimitSwitchID);
+    m_zeroSwitch = zeroSwitch;
     motorConfigurations();
   }
 
