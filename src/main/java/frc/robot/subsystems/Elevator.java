@@ -86,6 +86,8 @@ public class Elevator extends SubsystemBase {
 
   private void zeroElevator(){
     m_leftElevatorMotor.setPosition(0).isOK();
+    m_rightElevatorMotor.setPosition(0).isOK();
+    //do i change this section to make it reset the encoder?
     currentState = ElevatorStates.ELEVATOR_DOCKED;
   }
 
