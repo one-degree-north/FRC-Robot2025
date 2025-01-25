@@ -28,7 +28,7 @@ public class ElevatorCommands extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    commandToRun = Commands.run(() -> elevator.elevatorTransitionHandler(commandType), elevator);
+    commandToRun = Commands.run(() -> elevator.elevatorTransitionHandler(commandType), elevator).alongWith(Commands.waitUntil(() -> elevator.isElevatorAtSetpoint()));
   }
 
   // Called every time the scheduler runs while the command is scheduled.

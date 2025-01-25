@@ -33,6 +33,7 @@ public class Elevator extends SubsystemBase {
   private MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0).withSlot(0);
   private DigitalInput bottomLimitSwitch; // Magnetic Limit switch
   private boolean isElevatorEncoderReset;
+  private DigitalInput m_zeroSwitch;
 
 
 
@@ -133,7 +134,7 @@ public enum ElevatorStates {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    if (DriverStation.isDisabled() && bottomLimitSwitch.get()){
+    if (DriverStation.isDisabled() && bottomLimitSwitch.get() && m_zeroSwitch.get()){
         zeroElevator();
     }
     SmartDashboard.putString("ElevatorState", currentState.name());
