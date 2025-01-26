@@ -84,21 +84,9 @@ public class Elevator extends SubsystemBase {
     setControl(m_rightElevatorMotor, voltageOut.withOutput(voltage));
   }
 
-  private void zeroElevator(){
-    m_leftElevatorMotor.setPosition(0).isOK();
-    m_rightElevatorMotor.setPosition(0).isOK();
-    //do i change this section to make it reset the encoder?
-    currentState = ElevatorStates.ELEVATOR_DOCKED;
-  }
-
   public Boolean isElevatorAtSetpoint() {
     return Math.abs(m_elevatorEncoder.get() -
       currentState.getSetpointValue()) < ElevatorConstants.wristAllowedError;
-  }
-  
-
-  private void stopMotor(TalonFX motor) {
-    motor.stopMotor();
   }
 
 
@@ -138,7 +126,9 @@ public enum ElevatorStates {
   public void periodic() {
     // This method will be called once per scheduler run
     if (DriverStation.isDisabled() && bottomLimitSwitch.get() && m_zeroSwitch.get()){
-        zeroElevator();
+        currentState = ElevatorStates.ELEVATOR_DOCKED;
+        m_leftElevatorMotor.setPosition(m_elevatorEncoder.get()).isOK();
+        m_rightElevatorMotor.setPosition(m_elevatorEncoder.get()).isOK();
     }
     SmartDashboard.putString("ElevatorState", currentState.name());
   }
