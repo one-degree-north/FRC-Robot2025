@@ -4,13 +4,28 @@
 
 package frc.robot.constants;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+
 /** Add your docs here. */
 public class RegularConstants {
 
     public static final class MiscConstants {
         public static final int controllerID = 0;
         public static final int zeroSwitchID = 0;
+        
+    }
+
+    public static final class VisionConstants{
+        //todo
         public static final String cameraName = "Winston4817";
+        public static final Transform3d CamOffset = new Transform3d(
+            new Translation3d(),
+            new Rotation3d()
+        );
+        //todo
+        public static final double ambiguityThreshold = 2;
     }
 
     public static final class LEDConstants {
