@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.MotorConfigs;
 import frc.robot.constants.RegularConstants.ClimbConstants;
-import frc.robot.constants.RegularConstants.CoralConstants;
 
 public class Climb extends SubsystemBase {
   private TalonFX climbMotor;

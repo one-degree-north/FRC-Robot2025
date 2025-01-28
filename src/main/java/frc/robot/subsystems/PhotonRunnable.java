@@ -14,11 +14,11 @@ import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.RegularConstants.VisionConstants;
 
 @Logged
@@ -34,9 +34,9 @@ public class PhotonRunnable implements Runnable{
   public PhotonRunnable(Transform3d CamOffset) {
     m_Camera = new PhotonCamera(VisionConstants.cameraName);
     fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+    fieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
     photonPoseEstimator = new PhotonPoseEstimator(
       fieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, CamOffset);
-      
   }
 
   @Override
@@ -81,7 +81,7 @@ public class PhotonRunnable implements Runnable{
    * Gets the latest robot pose. Calling this will only return the pose once. If it returns a non-null value, it is a
    * new estimate that hasn't been returned before.
    * This pose will always be for the BLUE alliance. It must be flipped if the current alliance is RED.
-   * this code does not handle alliance flipping.
+   * this code does NOT handle alliance flipping.
    * @return latest estimated pose
    */
   public EstimatedRobotPose grabLatestEstimatedPose() {
