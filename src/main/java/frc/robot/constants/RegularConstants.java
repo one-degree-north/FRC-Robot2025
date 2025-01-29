@@ -105,4 +105,39 @@ public class RegularConstants {
         public static double flywheelMechanismRatio = 1/12;
         public static double pivotAllowedError = 0.05;
     }
+
+    public static final class ElevatorConstants {
+        public static int leftElevatorID = 0;
+        public static int rightElevatorID = 0;
+        public static int elevatorEncoderID = 0;
+        public static int magneticLimitSwitchID = 0;
+
+        public static double elevatorUpVoltage = 0;
+        public static double elevatorDockedPos = 0;
+        public static double elevatorL1Pos = 0;
+        public static double elevatorL2Pos = 0;
+        public static double elevatorL3Pos = 0;
+        public static double elevatorL4Pos = 0;
+
+
+        public static double ElevatorkP = 0;
+        public static double ElevatorkI = 0;
+        public static double ElevatorkD = 0;
+        public static double ElevatorkS = 0;
+        public static double ElevatorkV = 0;
+        public static double ElevatorkA = 0;
+        public static double ElevatorkG = 0;
+
+        public static double ElevatorMechanismRatio = 1/12;
+
+        public static double ElevatorMMAcceleration = 0;
+        public static double ElevatorMMCruiseVelocity = 0;
+        public static double ElevatorMMJerk = 0;
+
+        public static double wristAllowedError = 0;
+
+
+    }
+
+
 }
