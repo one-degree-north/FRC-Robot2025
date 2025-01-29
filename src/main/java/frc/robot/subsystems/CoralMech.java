@@ -16,6 +16,7 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.MotorConfigs;
@@ -133,6 +134,14 @@ private final SysIdRoutine coralWristCharacterization =
     null, 
     this)
   );
+
+public Command coralSysIDQuasistatic(SysIdRoutine.Direction direction){
+  return coralWristCharacterization.quasistatic(direction);
+}
+
+public Command coralSysIDDynamic(SysIdRoutine.Direction direction){
+  return coralWristCharacterization.dynamic(direction);
+}
 
 
   @Override
