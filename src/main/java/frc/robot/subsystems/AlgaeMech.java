@@ -59,7 +59,10 @@ private void configMotors(){
     NeutralModeValue.Brake, InvertedValue.Clockwise_Positive))
   .withFeedback(MotorConfigs.getFeedbackConfigs(AlgaeConstants.flywheelMechanismRatio))
   .withMotionMagic(MotorConfigs.geMotionMagicConfigs(AlgaeConstants.flywheelMMAcceleration,
-  AlgaeConstants.flywheelMMCruiseVelocity, AlgaeConstants.flywheelMMJerk));
+  AlgaeConstants.flywheelMMCruiseVelocity, AlgaeConstants.flywheelMMJerk))
+  .withSlot0(MotorConfigs.getSlot0Configs(
+    AlgaeConstants.flywheelkP, AlgaeConstants.flywheelkI, AlgaeConstants.flywheelkD, AlgaeConstants.flywheelkS,
+    AlgaeConstants.flywheelkV, AlgaeConstants.flywheelkA,AlgaeConstants.flywheelkG));
 
   TalonFXConfiguration innerRollerConfigs = new TalonFXConfiguration()
   .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("Falcon500"))
@@ -71,7 +74,10 @@ private void configMotors(){
   .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
     NeutralModeValue.Brake, InvertedValue.Clockwise_Positive))
   .withMotionMagic(MotorConfigs.geMotionMagicConfigs(AlgaeConstants.pivotMMAcceleration,
-  AlgaeConstants.pivotMMCruiseVelocity, AlgaeConstants.pivotMMJerk));
+  AlgaeConstants.pivotMMCruiseVelocity, AlgaeConstants.pivotMMJerk))
+  .withSlot0(MotorConfigs.getSlot0Configs(
+    AlgaeConstants.pivotkP, AlgaeConstants.pivotkI, AlgaeConstants.pivotkD, AlgaeConstants.pivotkS,
+    AlgaeConstants.pivotkV, AlgaeConstants.pivotkA,AlgaeConstants.pivotkG));
 
   m_leftFlywheel.getConfigurator().apply(flywheelConfigs);
   m_rightFlywheel.getConfigurator().apply(flywheelConfigs);

@@ -52,6 +52,7 @@ public class RegularConstants {
         public static double flywheelkS = 0;
         public static double flywheelkV = 0;
         public static double flywheelkA = 0;
+        public static double flywheelkG = 0;
 
         public static double flywheelMMAcceleration = 0;
         public static double flywheelMMCruiseVelocity = 0;
@@ -63,6 +64,7 @@ public class RegularConstants {
         public static double pivotkS = 0;
         public static double pivotkV = 0;
         public static double pivotkA = 0;
+        public static double pivotkG = 0;
         
         public static double pivotMMAcceleration = 0;
         public static double pivotMMCruiseVelocity = 0;
