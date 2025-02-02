@@ -20,7 +20,7 @@ public class ElevatorCommands extends Command {
   @Override
   public void initialize() {
     commandToRun = Commands.sequence( 
-        Commands.run(() -> elevator.elevatorTransitionHandler(commandType), elevator),
+        Commands.runOnce(() -> elevator.elevatorTransitionHandler(commandType), elevator),
         Commands.waitUntil(() -> elevator.isElevatorAtSetpoint())
     );
   }

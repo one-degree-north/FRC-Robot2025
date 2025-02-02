@@ -18,7 +18,7 @@ public class ClimbCommands extends Command {
 
     @Override
     public void initialize() {
-        commandToRun = Commands.run(() -> s_Climb.climbTransitionHandler(commandType), s_Climb);
+        commandToRun = Commands.runOnce(() -> s_Climb.climbTransitionHandler(commandType), s_Climb);
     }
 
     @Override

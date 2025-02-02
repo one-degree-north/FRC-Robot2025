@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -12,7 +13,7 @@ public class CoralMechCommands extends Command {
     private final CoralCommands commandType;
     private CoralStates initialState;
     private CoralStates finalState;
-    private SequentialCommandGroup commandGroup;
+    private Command commandGroup;
 
     public CoralMechCommands(CoralMech coralMech, CoralCommands commandType) {
         this.s_CoralMech = coralMech;
@@ -41,10 +42,10 @@ public class CoralMechCommands extends Command {
             default:
                 return;
         }
-        commandGroup = new SequentialCommandGroup(
-            new InstantCommand(() -> s_CoralMech.coralTransitionHandler(initialState), s_CoralMech),
-            new WaitUntilCommand(s_CoralMech::isWristAtSetpoint),
-            new InstantCommand(() -> {
+        commandGroup = Commands.sequence(
+            Commands.runOnce(() -> s_CoralMech.coralTransitionHandler(initialState), s_CoralMech),
+            Commands.waitUntil(s_CoralMech::isWristAtSetpoint),
+            Commands.runOnce(() -> {
                 if (finalState != null) {
                     s_CoralMech.coralTransitionHandler(finalState);
                 }
