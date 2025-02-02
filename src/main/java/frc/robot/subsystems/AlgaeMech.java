@@ -79,13 +79,13 @@ public class AlgaeMech extends SubsystemBase {
     m_leftPivot.getConfigurator().apply(pivotConfigs);
     m_rightPivot.getConfigurator().apply(pivotConfigs);
   }
-  
-  public boolean isPivotEncoderReset(){
-    return isPivotEncoderReset;
-  }
-  
-  public static boolean isAlgaeIntaked(){
-    return algaeSensor.get();
+
+public boolean isPivotEncoderReset(){
+  return isPivotEncoderReset;
+}
+
+public boolean isAlgaeIntaked(){
+  return algaeSensor.get();
 }
 
 private void setControl(TalonFX motor, ControlRequest req) {
