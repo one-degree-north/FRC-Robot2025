@@ -13,12 +13,14 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.MotorConfigs;
 import frc.robot.constants.RegularConstants.AlgaeConstants;
 
+@Logged
 public class AlgaeMech extends SubsystemBase {
   private TalonFX m_leftFlywheel;
   private TalonFX m_rightFlywheel;

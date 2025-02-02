@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -100,9 +101,19 @@ public class PoseEstimator extends SubsystemBase {
     }
 }
 
-
+  @Logged
   public Pose2d getCurrentPose() {
     return poseEstimator.getEstimatedPosition();
+  }
+
+  @Logged
+  public Pose2d getVisionEstimatedPose(){
+    if (camera.getTrackedVisionTargets().length > 0){
+      return camera.getTrackedVisionTargets()[0].toPose2d();
+    } else {
+      //workaround for when no vision targets are seen (null values make things dissapear in advantagescope)
+      return new Pose2d(1000, 1000, new Rotation2d());
+    }
   }
 
   private String getFormattedPose() {

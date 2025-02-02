@@ -71,8 +71,7 @@ public class PhotonRunnable implements Runnable{
       }
     }   
   }
-
-  @Logged
+  
   public Pose3d[] getTrackedVisionTargets() {
     return trackedVisionTargets.toArray(new Pose3d[trackedVisionTargets.size()]);
   }

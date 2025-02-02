@@ -15,6 +15,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -23,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.MotorConfigs;
 import frc.robot.constants.RegularConstants.ElevatorConstants;
 
+@Logged
 public class Elevator extends SubsystemBase {
   private TalonFX m_leftElevatorMotor;
   private TalonFX m_rightElevatorMotor;
@@ -37,7 +39,7 @@ public class Elevator extends SubsystemBase {
 
 
 
-  /** Creates a new Elevator. */
+  
   public Elevator(DigitalInput zeroSwitch) {
     setName("Elevator");
     m_leftElevatorMotor = new TalonFX(ElevatorConstants.leftElevatorID, "rio");
@@ -93,10 +95,12 @@ public class Elevator extends SubsystemBase {
   public void elevatorTransitionHandler(ElevatorStates wantedState) {
     switch (wantedState) {
         case ELEVATOR_UP, ELEVATOR_DOWN:
-          setElevatorMotorsVoltage(wantedState.getSetpointValue()); //Does this need to change positive/negative for going up and down
+          setElevatorMotorsVoltage(wantedState.getSetpointValue());
+          break;
         case ELEVATOR_DOCKED, ELEVATOR_L1, ELEVATOR_L2, ELEVATOR_L3, ELEVATOR_L4:
           setControl(m_leftElevatorMotor, motionMagicVoltage.withPosition(wantedState.getSetpointValue()));
           setControl(m_rightElevatorMotor, motionMagicVoltage.withPosition(wantedState.getSetpointValue()));
+          break;
           
     }
     currentState = wantedState;
@@ -127,8 +131,8 @@ public enum ElevatorStates {
     // This method will be called once per scheduler run
     if (DriverStation.isDisabled() && bottomLimitSwitch.get() && m_zeroSwitch.get()){
         currentState = ElevatorStates.ELEVATOR_DOCKED;
-        m_leftElevatorMotor.setPosition(m_elevatorEncoder.get()).isOK();
-        m_rightElevatorMotor.setPosition(m_elevatorEncoder.get()).isOK();
+        m_leftElevatorMotor.setPosition(m_elevatorEncoder.get());
+        m_rightElevatorMotor.setPosition(m_elevatorEncoder.get());
     }
     SmartDashboard.putString("ElevatorState", currentState.name());
   }

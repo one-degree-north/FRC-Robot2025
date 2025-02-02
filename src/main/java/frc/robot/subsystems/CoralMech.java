@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Volt;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -12,6 +14,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -22,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.MotorConfigs;
 import frc.robot.constants.RegularConstants.CoralConstants;
 
+@Logged
 public class CoralMech extends SubsystemBase {
   private TalonFX m_leftRoller;
   private TalonFX m_rightRoller;
@@ -129,10 +133,15 @@ public void coralTransitionHandler(CoralStates wantedState) {
 
 private final SysIdRoutine coralWristCharacterization = 
   new SysIdRoutine(
-    new SysIdRoutine.Config(),
-    new SysIdRoutine.Mechanism((Voltage volts) -> m_krakenWrist.setControl(voltageOut.withOutput(volts)), 
-    null, 
-    this)
+    new SysIdRoutine.Config(
+      null,
+      Voltage.ofBaseUnits(3, Volt),
+      null
+    ),
+    new SysIdRoutine.Mechanism(
+      (Voltage volts) -> m_krakenWrist.setControl(voltageOut.withOutput(volts)), 
+  null, 
+      this)
   );
 
 public Command coralSysIDQuasistatic(SysIdRoutine.Direction direction){
