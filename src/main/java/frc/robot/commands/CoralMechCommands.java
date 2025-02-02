@@ -1,24 +1,27 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.CoralMech;
 import frc.robot.subsystems.CoralMech.CoralStates;
 
 public class CoralMechCommands extends Command {
-    private final CoralMech coralMech;
+    private final CoralMech s_CoralMech;
     private final CoralCommands commandType;
     private CoralStates initialState;
     private CoralStates finalState;
+    private SequentialCommandGroup commandGroup;
 
     public CoralMechCommands(CoralMech coralMech, CoralCommands commandType) {
-        this.coralMech = coralMech;
+        this.s_CoralMech = coralMech;
         this.commandType = commandType;
         addRequirements(coralMech);
     }
-
     @Override
     public void initialize() {
+        // Set initial and final states based on the command type
         switch (commandType) {
             case DOCKED:
                 initialState = CoralStates.WRIST_DOCKED;
@@ -38,31 +41,36 @@ public class CoralMechCommands extends Command {
             default:
                 return;
         }
-        // Execute initial state transition
-        Commands.run(() -> coralMech.coralTransitionHandler(initialState), coralMech)
-            .alongWith(Commands.waitUntil(coralMech::isWristAtSetpoint))
-            .andThen(() -> {
-              if (finalState != null) { //for DOCKED case finalState is null
-                  coralMech.coralTransitionHandler(finalState);
-              }
-          })
-            .schedule();
+        commandGroup = new SequentialCommandGroup(
+            new InstantCommand(() -> s_CoralMech.coralTransitionHandler(initialState), s_CoralMech),
+            new WaitUntilCommand(s_CoralMech::isWristAtSetpoint),
+            new InstantCommand(() -> {
+                if (finalState != null) {
+                    s_CoralMech.coralTransitionHandler(finalState);
+                }
+            }, s_CoralMech)
+        );
     }
-
+    
+    @Override
+    //use commands. to fix this
+    public void execute() {
+        commandGroup.execute();
+    }
+    
     @Override
     public boolean isFinished() {
-        return switch (commandType) {
-            case DOCKED, REEFOUTTAKE, LVL1OUTTAKE -> coralMech.isWristAtSetpoint();
-            default -> false;
-        };
+        return s_CoralMech.isWristAtSetpoint();
     }
-
+    
     @Override
     public void end(boolean interrupted) {
         if (commandType != CoralCommands.DOCKED) {
-            coralMech.setBothRollersVoltage(0);
+            s_CoralMech.setBothRollersVoltage(0);
+            s_CoralMech.stopAllMotors();
         }
     }
+    
 
     public enum CoralCommands {
         DOCKED,

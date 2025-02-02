@@ -13,14 +13,14 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.MotorConfigs;
 import frc.robot.constants.RegularConstants.AlgaeConstants;
-import frc.robot.constants.RegularConstants.CoralConstants;
-import frc.robot.subsystems.CoralMech.CoralStates;
 
+@Logged
 public class AlgaeMech extends SubsystemBase {
   private TalonFX m_leftFlywheel;
   private TalonFX m_rightFlywheel;
@@ -35,56 +35,50 @@ public class AlgaeMech extends SubsystemBase {
 
   private DigitalInput m_zeroSwitch;
   private boolean isPivotEncoderReset;
-  private DigitalInput algaeSensor;
-
-  private AlgaeStates currentState;
-
-  /** Creates a new AlgaeMech. */
-  public AlgaeMech(DigitalInput zeroSwitch) {
-    setName("AlgaeMech");
-    m_leftFlywheel = new TalonFX(AlgaeConstants.leftFlywheelID, "rio");
-    m_rightFlywheel = new TalonFX(AlgaeConstants.rightFlywheelID, "rio");
-    m_innerRollers = new TalonFX(AlgaeConstants.innerRollersID, "rio");
-    m_leftPivot = new TalonFX(AlgaeConstants.leftPivotID, "rio");
-    m_rightPivot = new TalonFX(AlgaeConstants.rightPivotID, "rio");
-    algaeSensor = new DigitalInput(AlgaeConstants.beamBreakID);
-    m_zeroSwitch = zeroSwitch;
-    configMotors();
-  }
-
-private void configMotors(){
-  TalonFXConfiguration flywheelConfigs = new TalonFXConfiguration()
-  .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("Falcon500"))
-  .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
-    NeutralModeValue.Brake, InvertedValue.Clockwise_Positive))
-  .withFeedback(MotorConfigs.getFeedbackConfigs(AlgaeConstants.flywheelMechanismRatio))
-  .withMotionMagic(MotorConfigs.geMotionMagicConfigs(AlgaeConstants.flywheelMMAcceleration,
-  AlgaeConstants.flywheelMMCruiseVelocity, AlgaeConstants.flywheelMMJerk))
-  .withSlot0(MotorConfigs.getSlot0Configs(
-    AlgaeConstants.flywheelkP, AlgaeConstants.flywheelkI, AlgaeConstants.flywheelkD, AlgaeConstants.flywheelkS,
-    AlgaeConstants.flywheelkV, AlgaeConstants.flywheelkA,AlgaeConstants.flywheelkG));
-
-  TalonFXConfiguration innerRollerConfigs = new TalonFXConfiguration()
-  .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("Falcon500"))
-  .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
-    NeutralModeValue.Brake, InvertedValue.Clockwise_Positive));
+  private static DigitalInput algaeSensor;
   
-  TalonFXConfiguration pivotConfigs = new TalonFXConfiguration()
-  .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("KrakenX60"))
-  .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
-    NeutralModeValue.Brake, InvertedValue.Clockwise_Positive))
-  .withMotionMagic(MotorConfigs.geMotionMagicConfigs(AlgaeConstants.pivotMMAcceleration,
-  AlgaeConstants.pivotMMCruiseVelocity, AlgaeConstants.pivotMMJerk))
-  .withSlot0(MotorConfigs.getSlot0Configs(
-    AlgaeConstants.pivotkP, AlgaeConstants.pivotkI, AlgaeConstants.pivotkD, AlgaeConstants.pivotkS,
-    AlgaeConstants.pivotkV, AlgaeConstants.pivotkA,AlgaeConstants.pivotkG));
-
-  m_leftFlywheel.getConfigurator().apply(flywheelConfigs);
-  m_rightFlywheel.getConfigurator().apply(flywheelConfigs);
-  m_innerRollers.getConfigurator().apply(innerRollerConfigs);
-  m_leftPivot.getConfigurator().apply(pivotConfigs);
-  m_rightPivot.getConfigurator().apply(pivotConfigs);
-}
+    private AlgaeStates currentState;
+  
+    /** Creates a new AlgaeMech. */
+    public AlgaeMech(DigitalInput zeroSwitch) {
+      setName("AlgaeMech");
+      m_leftFlywheel = new TalonFX(AlgaeConstants.leftFlywheelID, "rio");
+      m_rightFlywheel = new TalonFX(AlgaeConstants.rightFlywheelID, "rio");
+      m_innerRollers = new TalonFX(AlgaeConstants.innerRollersID, "rio");
+      m_leftPivot = new TalonFX(AlgaeConstants.leftPivotID, "rio");
+      m_rightPivot = new TalonFX(AlgaeConstants.rightPivotID, "rio");
+      algaeSensor = new DigitalInput(AlgaeConstants.beamBreakID);
+      m_zeroSwitch = zeroSwitch;
+      configMotors();
+    }
+  
+  private void configMotors(){
+    TalonFXConfiguration flywheelConfigs = new TalonFXConfiguration()
+    .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("Falcon500"))
+    .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
+      NeutralModeValue.Brake, InvertedValue.Clockwise_Positive))
+    .withFeedback(MotorConfigs.getFeedbackConfigs(AlgaeConstants.flywheelMechanismRatio))
+    .withMotionMagic(MotorConfigs.geMotionMagicConfigs(AlgaeConstants.flywheelMMAcceleration,
+    AlgaeConstants.flywheelMMCruiseVelocity, AlgaeConstants.flywheelMMJerk));
+  
+    TalonFXConfiguration innerRollerConfigs = new TalonFXConfiguration()
+    .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("Falcon500"))
+    .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
+      NeutralModeValue.Brake, InvertedValue.Clockwise_Positive));
+    
+    TalonFXConfiguration pivotConfigs = new TalonFXConfiguration()
+    .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("KrakenX60"))
+    .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
+      NeutralModeValue.Brake, InvertedValue.Clockwise_Positive))
+    .withMotionMagic(MotorConfigs.geMotionMagicConfigs(AlgaeConstants.pivotMMAcceleration,
+    AlgaeConstants.pivotMMCruiseVelocity, AlgaeConstants.pivotMMJerk));
+  
+    m_leftFlywheel.getConfigurator().apply(flywheelConfigs);
+    m_rightFlywheel.getConfigurator().apply(flywheelConfigs);
+    m_innerRollers.getConfigurator().apply(innerRollerConfigs);
+    m_leftPivot.getConfigurator().apply(pivotConfigs);
+    m_rightPivot.getConfigurator().apply(pivotConfigs);
+  }
 
 public boolean isPivotEncoderReset(){
   return isPivotEncoderReset;
@@ -104,7 +98,7 @@ private void stopMotor(TalonFX motor) {
   motor.stopMotor();
 }
 
-private void zeroPivot(){
+private void zeroPivot(){ 
   m_leftPivot.setPosition(0).isOK();
   m_rightPivot.setPosition(0).isOK();
   currentState = AlgaeStates.PIVOT_DOCK_SHOOT;
@@ -132,12 +126,12 @@ public boolean arePivotsAtSetPoint(){
 
 public void pivotTransitionHandler(AlgaeStates wantedState) {
     switch (wantedState) {
-        case PIVOT_INTAKE, PIVOT_PROCESSOR, PIVOT_DOCK_SHOOT, PIVOT_LVL2REEF ->
-          setPivotPosition(wantedState.getSetpointValue()):;
-        case FLYWHEEL_INTAKE, FLYWHEEL_SHOOT ->
-          setBothFlywheelVelocity(motionMagicVelocityVoltage.withVelocity(wantedState.getSetpointValue()));
-        case INNERROLLER_INTAKE, INNERROLLER_OUTTAKE -->
-          setInnerRollersVelocity(motionMagicVelocityVoltage.withVelocity(wantedState.getSetpointValue()));
+        case PIVOT_INTAKE, PIVOT_PROCESSOR, PIVOT_DOCK_SHOOT, PIVOT_LVL2REEF:
+          setPivotPosition(wantedState.getSetpointValue());
+        case FLYWHEEL_INTAKE, FLYWHEEL_SHOOT:
+          setBothFlywheelVelocity(wantedState.getSetpointValue());
+        case INNERROLLER_INTAKE, INNERROLLER_OUTTAKE:
+          setInnerRollersVelocity(wantedState.getSetpointValue());
     }
     currentState = wantedState;
 }

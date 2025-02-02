@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Volt;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -12,15 +14,18 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.MotorConfigs;
 import frc.robot.constants.RegularConstants.CoralConstants;
 
+@Logged
 public class CoralMech extends SubsystemBase {
   private TalonFX m_leftRoller;
   private TalonFX m_rightRoller;
@@ -32,6 +37,7 @@ public class CoralMech extends SubsystemBase {
   private DigitalInput m_zeroSwitch;
 
   private boolean isWristEncoderReset;
+  public static boolean isCoralIntaked;
 
   /** Creates a new CoralMech. */
   public CoralMech(DigitalInput zeroSwitch) {
@@ -40,10 +46,10 @@ public class CoralMech extends SubsystemBase {
     m_rightRoller = new TalonFX(CoralConstants.rightRollerID, "rio");
     m_krakenWrist = new TalonFX(CoralConstants.wristRollerID, "rio");
     m_zeroSwitch = zeroSwitch;
-    motorConfigurations();
+    configureMotors();
   }
 
-  private void motorConfigurations(){
+  private void configureMotors(){
     TalonFXConfiguration rollerConfigs = new TalonFXConfiguration()
     .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("Falcon500"))
     .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
@@ -84,8 +90,14 @@ private void stopMotor(TalonFX motor) {
   motor.stopMotor();
 }
 
+public void stopAllMotors(){
+  stopMotor(m_leftRoller);
+  stopMotor(m_rightRoller);
+  stopMotor(m_krakenWrist);
+}
+
 private void zeroWrist(){
-  m_krakenWrist.setPosition(0).isOK();
+  m_krakenWrist.setPosition(0);
   currentState = CoralStates.WRIST_DOCKED;
 }
 
@@ -100,25 +112,45 @@ public Boolean isWristAtSetpoint() {
 
 public void coralTransitionHandler(CoralStates wantedState) {
     switch (wantedState) {
-        case ROLLER_INTAKE, ROLLER_OUTTAKE -> 
+        case ROLLER_INTAKE:
           setBothRollersVoltage(wantedState.getSetpointValue());
-        case ROLLER_L1OUTAKE -> {
+          isCoralIntaked = true;
+          break;
+        case ROLLER_OUTTAKE:
+          setBothRollersVoltage(wantedState.getSetpointValue());
+          isCoralIntaked = false;
+          break;
+        case ROLLER_L1OUTAKE:
           setControl(m_leftRoller, voltageOut.withOutput(CoralStates.ROLLER_OUTTAKE.getSetpointValue()));
           stopMotor(m_rightRoller);
-        }
-        case WRIST_REEF, WRIST_HP, WRIST_DOCKED -> 
+          break;
+        case WRIST_REEF, WRIST_HP, WRIST_DOCKED:
           setControl(m_krakenWrist, motionMagicVoltage.withPosition(wantedState.getSetpointValue()));
+          break;
     }
     currentState = wantedState;
 }
 
-private final SysIdRoutine coralWristCharacterization =
+private final SysIdRoutine coralWristCharacterization = 
   new SysIdRoutine(
-    new SysIdRoutine.Config(),
-    new SysIdRoutine.Mechanism((Voltage volts) -> m_krakenWrist.setControl(voltageOut.withOutput(volts)), 
-    null, 
-    this)
+    new SysIdRoutine.Config(
+      null,
+      Voltage.ofBaseUnits(3, Volt),
+      null
+    ),
+    new SysIdRoutine.Mechanism(
+      (Voltage volts) -> m_krakenWrist.setControl(voltageOut.withOutput(volts)), 
+  null, 
+      this)
   );
+
+public Command coralSysIDQuasistatic(SysIdRoutine.Direction direction){
+  return coralWristCharacterization.quasistatic(direction);
+}
+
+public Command coralSysIDDynamic(SysIdRoutine.Direction direction){
+  return coralWristCharacterization.dynamic(direction);
+}
 
 
   @Override
