@@ -15,16 +15,19 @@ public class LEDs extends SubsystemBase {
     private Alliance alliance = null;
     private LEDStates currentState = LEDStates.AUTON;
 
+    private final AlgaeMech algaeMech;
+    
     private static final double BREATH_DURATION = 1.0;
     private static final double WAVE_EXPONENT = 0.4;
     private static final double WAVE_CYCLE_LENGTH = 30.0;
     private static final double WAVE_CYCLE_DURATION = 0.25;
 
-    public LEDs() {
+    public LEDs(AlgaeMech algaeMech) {
         m_leds = new AddressableLED(LEDConstants.ledID);
         m_leds.setLength(m_ledBuffer.getLength());
         m_leds.setData(m_ledBuffer);
         m_leds.start();
+        this.algaeMech = algaeMech;
     }
 
     private LEDStates determineState() {
@@ -32,7 +35,7 @@ public class LEDs extends SubsystemBase {
             return currentState;
         }
         if (DriverStation.isAutonomous()) return LEDStates.AUTON;
-        boolean algaeIntaked = AlgaeMech.isAlgaeIntaked();
+        boolean algaeIntaked = algaeMech.isAlgaeIntaked();
         boolean coralIntaked = CoralMech.isCoralIntaked;
 
         if (algaeIntaked && coralIntaked) return LEDStates.BOTHINTAKED;

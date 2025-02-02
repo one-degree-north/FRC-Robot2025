@@ -164,7 +164,7 @@ public Command coralSysIDDynamic(SysIdRoutine.Direction direction){
     SmartDashboard.putBoolean("IsWristAtSetpoint?", isWristAtSetpoint());
     SmartDashboard.putNumber("LeftRollerVelocity", getRollerVelocity(m_leftRoller));
     SmartDashboard.putNumber("RightRollerVelocity", getRollerVelocity(m_rightRoller));
-    SmartDashboard.putString("CoralState", currentState.name());
+    SmartDashboard.putString("CoralState", (currentState != null) ? currentState.name() : "UNKNOWN");
   }
   
   public enum CoralStates {
