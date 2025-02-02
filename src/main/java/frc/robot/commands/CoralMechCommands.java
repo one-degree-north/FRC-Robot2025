@@ -60,7 +60,7 @@ public class CoralMechCommands extends Command {
     
     @Override
     public boolean isFinished() {
-        return s_CoralMech.isWristAtSetpoint();
+        return commandGroup.isFinished();
     }
     
     @Override

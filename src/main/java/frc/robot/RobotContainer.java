@@ -88,7 +88,7 @@ public class RobotContainer {
     private void drivingBindings(){
         //arbitrary bindings, change later depending on driver preferences
         joystick.square().onTrue(new AlgaeMechCommands(s_AlgaeMech, AlgaeMechCommands.AlgaeCommands.GROUNDINTAKE));
-        joystick.cross().onTrue(new AlgaeMechCommands(s_AlgaeMech, AlgaeMechCommands.AlgaeCommands.REEFOUTTAKE));
+        joystick.cross().onTrue(new AlgaeMechCommands(s_AlgaeMech, AlgaeMechCommands.AlgaeCommands.REEFINTAKE));
 
         joystick.L1().onTrue(new ClimbCommands(s_Climb, Climb.ClimbStates.CLIMBUP));
         joystick.R1().onTrue(new ClimbCommands(s_Climb, Climb.ClimbStates.CLIMBDOWN));

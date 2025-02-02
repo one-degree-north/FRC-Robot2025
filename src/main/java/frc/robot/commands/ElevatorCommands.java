@@ -35,17 +35,6 @@ public class ElevatorCommands extends Command {
       elevator.setElevatorMotorsVoltage(0);
   }
 
-
-  public enum ElevatorCommandsEnum {
-    ELEVATOR_UP,
-    ELEVATOR_DOWN,
-    ELEVATOR_DOCKED,
-    ELEVATOR_L1,
-    ELEVATOR_L2,
-    ELEVATOR_L3,
-    ELEVATOR_L4,
-}
-
   @Override
   public boolean isFinished() {
     return commandToRun.isFinished();

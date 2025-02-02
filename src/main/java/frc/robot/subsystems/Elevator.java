@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Volt;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -22,8 +23,8 @@ import frc.robot.constants.MotorConfigs;
 import frc.robot.constants.RegularConstants.ElevatorConstants;
 
 public class Elevator extends SubsystemBase {
-  private TalonFX m_leftElevatorMotor;
-  private TalonFX m_rightElevatorMotor;
+  private TalonFX m_elevatorMasterMotor;
+  private TalonFX m_elevatorSlaveMotor;
   private DutyCycleEncoder m_elevatorEncoder;
   private DigitalInput bottomLimitSwitch;
   private DigitalInput m_zeroSwitch;
@@ -37,31 +38,36 @@ public class Elevator extends SubsystemBase {
 
   public Elevator(DigitalInput zeroSwitch) {
     setName("Elevator");
-    m_leftElevatorMotor = new TalonFX(ElevatorConstants.leftElevatorID, "rio");
-    m_rightElevatorMotor = new TalonFX(ElevatorConstants.rightElevatorID, "rio");
+    m_elevatorMasterMotor = new TalonFX(ElevatorConstants.leftElevatorID, "rio");
+    m_elevatorSlaveMotor = new TalonFX(ElevatorConstants.rightElevatorID, "rio");
     m_elevatorEncoder = new DutyCycleEncoder(ElevatorConstants.elevatorEncoderID);
     bottomLimitSwitch = new DigitalInput(ElevatorConstants.magneticLimitSwitchID);
     m_zeroSwitch = zeroSwitch;
     motorConfigurations();
   }
 
+
   private void motorConfigurations(){
-      m_leftElevatorMotor.getConfigurator().apply(motorConfigurationInverted(InvertedValue.Clockwise_Positive));
-      m_rightElevatorMotor.getConfigurator().apply(motorConfigurationInverted(InvertedValue.CounterClockwise_Positive));
+    m_elevatorMasterMotor.getConfigurator().apply(motorConfigurationInverted(InvertedValue.Clockwise_Positive));
+    m_elevatorSlaveMotor.getConfigurator().apply(motorConfigurationInverted(InvertedValue.CounterClockwise_Positive));
+
+    // Set the follower motor to follow the master motor
+    Follower followerConfig = new Follower(m_elevatorMasterMotor.getDeviceID(), true);
+    m_elevatorSlaveMotor.setControl(followerConfig);
   }
 
   private TalonFXConfiguration motorConfigurationInverted(InvertedValue invertedValue){
-      TalonFXConfiguration elevatorConfigs = new TalonFXConfiguration()
-      .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("KrakenX60"))
-      .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
-        NeutralModeValue.Brake, invertedValue))
-      .withSlot0(MotorConfigs.getSlot0Configs(
-        ElevatorConstants.ElevatorkP, ElevatorConstants.ElevatorkI, ElevatorConstants.ElevatorkD, 
-        ElevatorConstants.ElevatorkS, ElevatorConstants.ElevatorkV, ElevatorConstants.ElevatorkA, ElevatorConstants.ElevatorkG))
-      .withFeedback(MotorConfigs.getFeedbackConfigs(ElevatorConstants.ElevatorMechanismRatio))
-      .withMotionMagic(MotorConfigs.geMotionMagicConfigs(ElevatorConstants.ElevatorMMAcceleration,
-       ElevatorConstants.ElevatorMMCruiseVelocity, ElevatorConstants.ElevatorMMJerk));
-       return elevatorConfigs;
+    TalonFXConfiguration elevatorConfigs = new TalonFXConfiguration()
+    .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("KrakenX60"))
+    .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
+      NeutralModeValue.Brake, invertedValue))
+    .withSlot0(MotorConfigs.getSlot0Configs(
+      ElevatorConstants.ElevatorkP, ElevatorConstants.ElevatorkI, ElevatorConstants.ElevatorkD, 
+      ElevatorConstants.ElevatorkS, ElevatorConstants.ElevatorkV, ElevatorConstants.ElevatorkA, ElevatorConstants.ElevatorkG))
+    .withFeedback(MotorConfigs.getFeedbackConfigs(ElevatorConstants.ElevatorMechanismRatio))
+    .withMotionMagic(MotorConfigs.geMotionMagicConfigs(ElevatorConstants.ElevatorMMAcceleration,
+     ElevatorConstants.ElevatorMMCruiseVelocity, ElevatorConstants.ElevatorMMJerk));
+     return elevatorConfigs;
   }
 
   public boolean isElevatorDown(){
@@ -75,8 +81,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public void setElevatorMotorsVoltage(double voltage){
-    setControl(m_leftElevatorMotor, voltageOut.withOutput(voltage));
-    setControl(m_rightElevatorMotor, voltageOut.withOutput(voltage));
+    setControl(m_elevatorMasterMotor, voltageOut.withOutput(voltage));
   }
 
   private final SysIdRoutine elevatorCharacterization =
@@ -88,8 +93,7 @@ public class Elevator extends SubsystemBase {
         ),
         new SysIdRoutine.Mechanism(
             (Voltage volts) -> {
-                m_leftElevatorMotor.setControl(voltageOut.withOutput(volts));
-                m_rightElevatorMotor.setControl(voltageOut.withOutput(volts));
+                m_elevatorMasterMotor.setControl(voltageOut.withOutput(volts));
             },
             null,
             this
@@ -97,12 +101,12 @@ public class Elevator extends SubsystemBase {
     );
 
   public Command elevatorSysIDQuasistatic(SysIdRoutine.Direction direction){
-  return elevatorCharacterization.quasistatic(direction);
-}
+    return elevatorCharacterization.quasistatic(direction);
+  }
 
-public Command elevatorSysIDDynamic(SysIdRoutine.Direction direction){
-  return elevatorCharacterization.dynamic(direction);
-}
+  public Command elevatorSysIDDynamic(SysIdRoutine.Direction direction){
+    return elevatorCharacterization.dynamic(direction);
+  }
 
   public boolean isElevatorAtSetpoint() {
     return Math.abs(m_elevatorEncoder.get() - currentState.getSetpointValue()) < ElevatorConstants.wristAllowedError;
@@ -114,8 +118,8 @@ public Command elevatorSysIDDynamic(SysIdRoutine.Direction direction){
           setElevatorMotorsVoltage(wantedState.getSetpointValue());
           break;
         case ELEVATOR_DOCKED, ELEVATOR_L1, ELEVATOR_L2, ELEVATOR_L3, ELEVATOR_L4:
-          setControl(m_leftElevatorMotor, motionMagicVoltage.withPosition(wantedState.getSetpointValue()));
-          setControl(m_rightElevatorMotor, motionMagicVoltage.withPosition(wantedState.getSetpointValue()));
+          setControl(m_elevatorMasterMotor, motionMagicVoltage.withPosition(wantedState.getSetpointValue()));
+          setControl(m_elevatorSlaveMotor, motionMagicVoltage.withPosition(wantedState.getSetpointValue()));
           break;
     }
     currentState = wantedState;
@@ -146,8 +150,8 @@ public Command elevatorSysIDDynamic(SysIdRoutine.Direction direction){
     // Reset encoder ONCE if both limit switches are active AND we haven't reset yet
     if (!hasResetOccurred && DriverStation.isDisabled() && bottomLimitSwitch.get() && m_zeroSwitch.get()) {
         currentState = ElevatorStates.ELEVATOR_DOCKED;
-        m_leftElevatorMotor.setPosition(0); // Reset encoder position to zero
-        m_rightElevatorMotor.setPosition(0);
+        m_elevatorMasterMotor.setPosition(0); // Reset encoder position to zero
+        m_elevatorSlaveMotor.setPosition(0);
         isElevatorEncoderReset = true;
         hasResetOccurred = true; // Prevent repeated resets
     }

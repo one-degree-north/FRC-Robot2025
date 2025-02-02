@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Volt;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -28,11 +29,11 @@ import frc.robot.constants.RegularConstants.AlgaeConstants;
 
 @Logged
 public class AlgaeMech extends SubsystemBase {
-  private TalonFX m_leftFlywheel;
-  private TalonFX m_rightFlywheel;
+  private TalonFX m_flywheelMaster;
+  private TalonFX m_flywheelSlave;
   private TalonFX m_innerRollers;
-  private TalonFX m_leftPivot;
-  private TalonFX m_rightPivot;
+  private TalonFX m_pivotMaster;
+  private TalonFX m_pivotSlave;
 
   private MotionMagicVelocityVoltage motionMagicVelocityVoltage 
   = new MotionMagicVelocityVoltage(0).withSlot(0);
@@ -49,11 +50,11 @@ public class AlgaeMech extends SubsystemBase {
     /** Creates a new AlgaeMech. */
     public AlgaeMech(DigitalInput zeroSwitch) {
       setName("AlgaeMech");
-      m_leftFlywheel = new TalonFX(AlgaeConstants.leftFlywheelID, "rio");
-      m_rightFlywheel = new TalonFX(AlgaeConstants.rightFlywheelID, "rio");
+      m_flywheelMaster = new TalonFX(AlgaeConstants.leftFlywheelID, "rio");
+      m_flywheelSlave = new TalonFX(AlgaeConstants.rightFlywheelID, "rio");
       m_innerRollers = new TalonFX(AlgaeConstants.innerRollersID, "rio");
-      m_leftPivot = new TalonFX(AlgaeConstants.leftPivotID, "rio");
-      m_rightPivot = new TalonFX(AlgaeConstants.rightPivotID, "rio");
+      m_pivotMaster = new TalonFX(AlgaeConstants.leftPivotID, "rio");
+      m_pivotSlave = new TalonFX(AlgaeConstants.rightPivotID, "rio");
       algaeSensor = new DigitalInput(AlgaeConstants.beamBreakID);
       m_zeroSwitch = zeroSwitch;
       configMotors();
@@ -80,11 +81,17 @@ public class AlgaeMech extends SubsystemBase {
     .withMotionMagic(MotorConfigs.geMotionMagicConfigs(AlgaeConstants.pivotMMAcceleration,
     AlgaeConstants.pivotMMCruiseVelocity, AlgaeConstants.pivotMMJerk));
   
-    m_leftFlywheel.getConfigurator().apply(flywheelConfigs);
-    m_rightFlywheel.getConfigurator().apply(flywheelConfigs);
+    m_flywheelMaster.getConfigurator().apply(flywheelConfigs);
+    m_flywheelSlave.getConfigurator().apply(flywheelConfigs);
     m_innerRollers.getConfigurator().apply(innerRollerConfigs);
-    m_leftPivot.getConfigurator().apply(pivotConfigs);
-    m_rightPivot.getConfigurator().apply(pivotConfigs);
+    m_pivotMaster.getConfigurator().apply(pivotConfigs);
+    m_pivotSlave.getConfigurator().apply(pivotConfigs);
+  }
+
+  private void configureFollowers() {
+    m_flywheelSlave.setControl(new Follower(m_flywheelMaster.getDeviceID(), false));
+
+    m_pivotSlave.setControl(new Follower(m_pivotMaster.getDeviceID(), false));
   }
 
   public boolean isPivotEncoderReset(){
@@ -105,20 +112,23 @@ public class AlgaeMech extends SubsystemBase {
     motor.stopMotor();
   }
 
+  public void stopAll(){
+    stopMotor(m_flywheelMaster);
+    stopMotor(m_innerRollers);
+    stopMotor(m_pivotMaster);
+  }
+
   private void zeroPivot(){ 
-    m_leftPivot.setPosition(0);
-    m_rightPivot.setPosition(0);
+    m_pivotMaster.setPosition(0);
     currentState = AlgaeStates.PIVOT_DOCK_SHOOT;
   }
 
   public void setBothFlywheelVelocity(double flywheelVelocity){
-    setControl(m_leftFlywheel, motionMagicVelocityVoltage.withVelocity(flywheelVelocity));
-    setControl(m_rightFlywheel, motionMagicVelocityVoltage.withVelocity(flywheelVelocity));
+    setControl(m_flywheelMaster, motionMagicVelocityVoltage.withVelocity(flywheelVelocity));
   }
 
   public void setPivotPosition(double pivotPosition){
-    setControl(m_leftPivot, motionMagicVoltage.withPosition(pivotPosition));
-    setControl(m_rightPivot, motionMagicVoltage.withPosition(pivotPosition));
+    setControl(m_pivotMaster, motionMagicVoltage.withPosition(pivotPosition));
   }
 
   public void setInnerRollersVelocity(double rollerVoltage){
@@ -126,10 +136,14 @@ public class AlgaeMech extends SubsystemBase {
   }
 
   public boolean arePivotsAtSetPoint(){
-    return (Math.abs(m_leftPivot.getPosition().getValueAsDouble() -
-      currentState.getSetpointValue()) < AlgaeConstants.pivotAllowedError)
-      && (Math.abs(m_rightPivot.getPosition().getValueAsDouble() -
+    return (Math.abs(m_pivotMaster.getPosition().getValueAsDouble() -
       currentState.getSetpointValue()) < AlgaeConstants.pivotAllowedError);
+  }
+
+  public boolean isFlywheelAtTargetSpeed(){
+    double currentVelocity = m_flywheelMaster.getVelocity().getValueAsDouble(); // double check gear ratios
+    double targetVelocity = currentState.getSetpointValue(); // Ensure this returns the target velocity for the flywheel
+    return Math.abs(currentVelocity - targetVelocity) < AlgaeConstants.flywheelAllowedError;
   }
 
   private final SysIdRoutine pivotCharacterization =
@@ -141,8 +155,7 @@ public class AlgaeMech extends SubsystemBase {
           ),
           new SysIdRoutine.Mechanism(
               (Voltage volts) -> {
-                  m_leftPivot.setControl(voltageOut.withOutput(volts));
-                  m_rightPivot.setControl(voltageOut.withOutput(volts));
+                  m_pivotMaster.setControl(voltageOut.withOutput(volts));
               },
               null,  // No feedback mechanism needed for now
               this
@@ -158,8 +171,7 @@ public class AlgaeMech extends SubsystemBase {
         ),
         new SysIdRoutine.Mechanism(
             (Voltage volts) -> {
-                m_leftFlywheel.setControl(voltageOut.withOutput(volts));
-                m_rightFlywheel.setControl(voltageOut.withOutput(volts));
+                m_flywheelMaster.setControl(voltageOut.withOutput(volts));
             },
             null,  // No feedback mechanism needed for now
             this
@@ -190,9 +202,6 @@ public class AlgaeMech extends SubsystemBase {
       }
       currentState = wantedState;
   }
-
-
-
 
   @Override
   public void periodic() {

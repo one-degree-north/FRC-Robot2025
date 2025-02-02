@@ -106,6 +106,7 @@ public class RegularConstants {
 
         public static double flywheelMechanismRatio = 1/12;
         public static double pivotAllowedError = 0.05;
+        public static double flywheelAllowedError = 0;
     }
 
     public static final class ElevatorConstants {
