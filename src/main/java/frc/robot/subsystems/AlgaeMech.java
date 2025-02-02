@@ -86,11 +86,11 @@ public class AlgaeMech extends SubsystemBase {
     m_innerRollers.getConfigurator().apply(innerRollerConfigs);
     m_pivotMaster.getConfigurator().apply(pivotConfigs);
     m_pivotSlave.getConfigurator().apply(pivotConfigs);
+    configureFollowers();
   }
 
   private void configureFollowers() {
     m_flywheelSlave.setControl(new Follower(m_flywheelMaster.getDeviceID(), false));
-
     m_pivotSlave.setControl(new Follower(m_pivotMaster.getDeviceID(), false));
   }
 

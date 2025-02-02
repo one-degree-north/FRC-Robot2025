@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.MotorConfigs;
 import frc.robot.constants.RegularConstants.ElevatorConstants;
 
+@Logged
 public class Elevator extends SubsystemBase {
   private TalonFX m_elevatorMasterMotor;
   private TalonFX m_elevatorSlaveMotor;

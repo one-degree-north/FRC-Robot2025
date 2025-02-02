@@ -35,10 +35,7 @@ public class RobotContainer {
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1)
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-
+            
     private final CommandPS5Controller joystick = new CommandPS5Controller(MiscConstants.controllerID);
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final CoralMech s_CoralMech = new CoralMech(zeroSwitch);
@@ -147,6 +144,6 @@ public class RobotContainer {
 
     // Add more for every subsystem
     private enum SUBSYSTEMTOTUNE {
-        DRIVETRAIN, CORALMECH, ALGAEMECH, CLIMB, ELEVATOR
+        DRIVETRAIN, CORALMECH, ALGAEMECH, ELEVATOR
     }
 }
