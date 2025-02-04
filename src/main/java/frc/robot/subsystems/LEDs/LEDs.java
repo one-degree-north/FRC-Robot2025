@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.LEDs;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
@@ -8,6 +8,10 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.RegularConstants.LEDConstants;
+import frc.robot.subsystems.AlgaeRollers.AlgaeInnerRollers;
+import frc.robot.subsystems.CoralRollers.CoralRoller;
+import frc.robot.subsystems.Superstructure.AlgaePivot;
+import frc.robot.subsystems.Superstructure.CoralWrist;
 
 public class LEDs extends SubsystemBase {
     private final AddressableLED m_leds;
@@ -15,14 +19,14 @@ public class LEDs extends SubsystemBase {
     private Alliance alliance = null;
     private LEDStates currentState = LEDStates.AUTON;
 
-    private final AlgaeMech algaeMech;
+    private final AlgaePivot algaeMech;
     
     private static final double BREATH_DURATION = 1.0;
     private static final double WAVE_EXPONENT = 0.4;
     private static final double WAVE_CYCLE_LENGTH = 30.0;
     private static final double WAVE_CYCLE_DURATION = 0.25;
 
-    public LEDs(AlgaeMech algaeMech) {
+    public LEDs(AlgaePivot algaeMech) {
         m_leds = new AddressableLED(LEDConstants.ledID);
         m_leds.setLength(m_ledBuffer.getLength());
         m_leds.setData(m_ledBuffer);
@@ -35,8 +39,8 @@ public class LEDs extends SubsystemBase {
             return currentState;
         }
         if (DriverStation.isAutonomous()) return LEDStates.AUTON;
-        boolean algaeIntaked = algaeMech.isAlgaeIntaked();
-        boolean coralIntaked = CoralMech.isCoralIntaked;
+        boolean algaeIntaked = AlgaeInnerRollers.isAlgaeIntaked();
+        boolean coralIntaked = CoralRoller.isCoralIntaked;
 
         if (algaeIntaked && coralIntaked) return LEDStates.BOTHINTAKED;
         if (algaeIntaked) return LEDStates.ALGAEINTAKED;
@@ -112,11 +116,7 @@ public class LEDs extends SubsystemBase {
     }
 
     private enum LEDSections {
-        FULL(0, LEDConstants.ledLength),
-        BL(0, 1),
-        FL(1, 2),
-        FR(2, 3),
-        BR(3, 4);
+        FULL(0, LEDConstants.ledLength);
 
         private final int start, end;
 

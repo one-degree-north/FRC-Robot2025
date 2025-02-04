@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.Superstructure;
 
 import static edu.wpi.first.units.Units.Volt;
 
@@ -26,35 +26,25 @@ import frc.robot.constants.MotorConfigs;
 import frc.robot.constants.RegularConstants.CoralConstants;
 
 @Logged
-public class CoralMech extends SubsystemBase {
-  private TalonFX m_leftRoller;
-  private TalonFX m_rightRoller;
+public class CoralWrist extends SubsystemBase {
   private TalonFX m_krakenWrist;
-
-  private VoltageOut voltageOut = new VoltageOut(0);
   private MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0).withSlot(0);
+  private VoltageOut voltageOut = new VoltageOut(0);
   private CoralStates currentState;
+  private CoralStates desiredState;
   private DigitalInput m_zeroSwitch;
 
   private boolean isWristEncoderReset;
-  public static boolean isCoralIntaked;
 
   /** Creates a new CoralMech. */
-  public CoralMech(DigitalInput zeroSwitch) {
+  public CoralWrist(DigitalInput zeroSwitch) {
     setName("CoralMech");
-    m_leftRoller = new TalonFX(CoralConstants.leftRollerID, "rio");
-    m_rightRoller = new TalonFX(CoralConstants.rightRollerID, "rio");
     m_krakenWrist = new TalonFX(CoralConstants.wristRollerID, "rio");
     m_zeroSwitch = zeroSwitch;
     configureMotors();
   }
 
-  private void configureMotors(){
-    TalonFXConfiguration rollerConfigs = new TalonFXConfiguration()
-    .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("Falcon500"))
-    .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
-      NeutralModeValue.Coast, InvertedValue.Clockwise_Positive));
-    
+  private void configureMotors(){    
     TalonFXConfiguration wristConfigs = new TalonFXConfiguration()
     .withCurrentLimits(MotorConfigs.getCurrentLimitConfig("KrakenX60"))
     .withMotorOutput(MotorConfigs.getMotorOutputConfigs(
@@ -65,9 +55,7 @@ public class CoralMech extends SubsystemBase {
     .withFeedback(MotorConfigs.getFeedbackConfigs(CoralConstants.wristMechanismRatio))
     .withMotionMagic(MotorConfigs.geMotionMagicConfigs(CoralConstants.wristMMAcceleration,
      CoralConstants.wristMMCruiseVelocity, CoralConstants.wristMMJerk));
-    
-    m_leftRoller.getConfigurator().apply(rollerConfigs);
-    m_rightRoller.getConfigurator().apply(rollerConfigs);
+
     m_krakenWrist.getConfigurator().apply(wristConfigs);
   }
 
@@ -81,18 +69,11 @@ private void setControl(TalonFX motor, ControlRequest req) {
   }
 }
 
-public void setBothRollersVoltage(double voltage) {
-  setControl(m_leftRoller, voltageOut.withOutput(voltage));
-  setControl(m_rightRoller, voltageOut.withOutput(voltage));
-}
-
 private void stopMotor(TalonFX motor) {
   motor.stopMotor();
 }
 
 public void stopAllMotors(){
-  stopMotor(m_leftRoller);
-  stopMotor(m_rightRoller);
   stopMotor(m_krakenWrist);
 }
 
@@ -101,34 +82,18 @@ private void zeroWrist(){
   currentState = CoralStates.WRIST_DOCKED;
 }
 
-private double getRollerVelocity(TalonFX motor) {
-  return motor.getVelocity().getValueAsDouble();
-}
-
 public Boolean isWristAtSetpoint() {
   return Math.abs(m_krakenWrist.getPosition().getValueAsDouble() -
     currentState.getSetpointValue()) < CoralConstants.wristAllowedError;
 }
 
-public void coralTransitionHandler(CoralStates wantedState) {
-    switch (wantedState) {
-        case ROLLER_INTAKE:
-          setBothRollersVoltage(wantedState.getSetpointValue());
-          isCoralIntaked = true;
-          break;
-        case ROLLER_OUTTAKE:
-          setBothRollersVoltage(wantedState.getSetpointValue());
-          isCoralIntaked = false;
-          break;
-        case ROLLER_L1OUTAKE:
-          setControl(m_leftRoller, voltageOut.withOutput(CoralStates.ROLLER_OUTTAKE.getSetpointValue()));
-          stopMotor(m_rightRoller);
-          break;
-        case WRIST_REEF, WRIST_HP, WRIST_DOCKED:
-          setControl(m_krakenWrist, motionMagicVoltage.withPosition(wantedState.getSetpointValue()));
-          break;
-    }
-    currentState = wantedState;
+private void setDesiredState(CoralStates state) {
+  desiredState = state;
+}
+
+public void coralTransitionHandler(CoralStates desiredState) {
+  setControl(m_krakenWrist, motionMagicVoltage.withPosition(desiredState.getSetpointValue()));
+  currentState = desiredState;
 }
 
 private final SysIdRoutine coralWristCharacterization = 
@@ -160,17 +125,17 @@ public Command coralSysIDDynamic(SysIdRoutine.Direction direction){
         zeroWrist();
       }
     }
+
+    if (desiredState != currentState) {
+      coralTransitionHandler(desiredState);
+    }
+
     SmartDashboard.putBoolean("IsWristEncoderReset?", isWristEncoderReset);
     SmartDashboard.putBoolean("IsWristAtSetpoint?", isWristAtSetpoint());
-    SmartDashboard.putNumber("LeftRollerVelocity", getRollerVelocity(m_leftRoller));
-    SmartDashboard.putNumber("RightRollerVelocity", getRollerVelocity(m_rightRoller));
     SmartDashboard.putString("CoralState", (currentState != null) ? currentState.name() : "UNKNOWN");
   }
   
   public enum CoralStates {
-    ROLLER_INTAKE(CoralConstants.rollerIntakeVoltage),
-    ROLLER_OUTTAKE(CoralConstants.rollerOuttakeVoltage),
-    ROLLER_L1OUTAKE(CoralConstants.rollerOuttakeVoltage),
     WRIST_REEF(CoralConstants.wristReefPos),
     WRIST_HP(CoralConstants.wristIntakePos),
     WRIST_DOCKED(CoralConstants.wristDockedPos);
@@ -184,5 +149,5 @@ public Command coralSysIDDynamic(SysIdRoutine.Direction direction){
     public double getSetpointValue() {
       return setpointValue;
     }
-}
+  }
 }

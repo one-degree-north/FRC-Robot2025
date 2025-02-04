@@ -30,17 +30,17 @@ public class RegularConstants {
 
     public static final class LEDConstants {
         public static final int ledID = 0;
-        public static final int ledLength = 0;
+        public static final int ledLength = 133;
     }
 
     public static final class ClimbConstants {
-        public static final int climbMotorID = 0;
+        public static final int climbMotorID = 13;
         public static final double climbVoltageOut = 0;
-        public static final double climbMechanismRatio = 0;
+        public static final double climbMechanismRatio = 192/1;
     }
     public static final class CoralConstants {
-        public static int leftRollerID = 0;
-        public static int rightRollerID = 0;
+        public static int leftRollerID = 14;
+        public static int rightRollerID = 18;
         public static int wristRollerID = 0;
 
         public static double wristkP = 0;
@@ -65,12 +65,12 @@ public class RegularConstants {
     }
 
     public static final class AlgaeConstants{
-        public static final int beamBreakID = 0;
-        public static int leftFlywheelID = 0;
-        public static int rightFlywheelID = 0;
-        public static int innerRollersID = 0;
-        public static int leftPivotID = 0;
-        public static int rightPivotID = 0;
+        public static final int beamBreakID = 3;
+        public static int flywheelMasterID = 19;
+        public static int flywheelSlaveID = 17;
+        public static int innerRollersID = 15;
+        public static int pivotMasterID = 43;
+        public static int pivotSlaveID = 42;
 
         public static double flywheelkP = 0;
         public static double flywheelkI = 0;
@@ -110,10 +110,10 @@ public class RegularConstants {
     }
 
     public static final class ElevatorConstants {
-        public static int leftElevatorID = 0;
-        public static int rightElevatorID = 0;
-        public static int elevatorEncoderID = 0;
-        public static int magneticLimitSwitchID = 0;
+        public static int masterElevatorID = 2;
+        public static int slaveElevatorID = 1;
+        public static int elevatorEncoderID = 1;
+        public static int magneticLimitSwitchID = 4;
 
         public static double elevatorUpVoltage = 0;
         public static double elevatorDockedPos = 0;

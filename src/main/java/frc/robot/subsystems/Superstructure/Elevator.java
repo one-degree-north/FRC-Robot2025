@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.Superstructure;
 
 import static edu.wpi.first.units.Units.Volt;
 
@@ -40,8 +40,8 @@ public class Elevator extends SubsystemBase {
 
   public Elevator(DigitalInput zeroSwitch) {
     setName("Elevator");
-    m_elevatorMasterMotor = new TalonFX(ElevatorConstants.leftElevatorID, "rio");
-    m_elevatorSlaveMotor = new TalonFX(ElevatorConstants.rightElevatorID, "rio");
+    m_elevatorMasterMotor = new TalonFX(ElevatorConstants.masterElevatorID, "rio");
+    m_elevatorSlaveMotor = new TalonFX(ElevatorConstants.slaveElevatorID, "rio");
     m_elevatorEncoder = new DutyCycleEncoder(ElevatorConstants.elevatorEncoderID);
     bottomLimitSwitch = new DigitalInput(ElevatorConstants.magneticLimitSwitchID);
     m_zeroSwitch = zeroSwitch;
@@ -51,7 +51,7 @@ public class Elevator extends SubsystemBase {
 
   private void motorConfigurations(){
     m_elevatorMasterMotor.getConfigurator().apply(motorConfigurationInverted(InvertedValue.Clockwise_Positive));
-    m_elevatorSlaveMotor.getConfigurator().apply(motorConfigurationInverted(InvertedValue.CounterClockwise_Positive));
+    m_elevatorSlaveMotor.getConfigurator().apply(motorConfigurationInverted(InvertedValue.Clockwise_Positive));
 
     // Set the follower motor to follow the master motor
     Follower followerConfig = new Follower(m_elevatorMasterMotor.getDeviceID(), true);
@@ -152,8 +152,8 @@ public class Elevator extends SubsystemBase {
     // Reset encoder ONCE if both limit switches are active AND we haven't reset yet
     if (!hasResetOccurred && DriverStation.isDisabled() && bottomLimitSwitch.get() && m_zeroSwitch.get()) {
         currentState = ElevatorStates.ELEVATOR_DOCKED;
-        m_elevatorMasterMotor.setPosition(0); // Reset encoder position to zero
-        m_elevatorSlaveMotor.setPosition(0);
+        m_elevatorMasterMotor.setPosition(m_elevatorEncoder.get());
+        m_elevatorSlaveMotor.setPosition(m_elevatorEncoder.get());
         isElevatorEncoderReset = true;
         hasResetOccurred = true; // Prevent repeated resets
     }

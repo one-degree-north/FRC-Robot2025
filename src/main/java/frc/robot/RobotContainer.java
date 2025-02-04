@@ -15,15 +15,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.RegularConstants.MiscConstants;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.CoralMech;
-import frc.robot.subsystems.AlgaeMech;
-import frc.robot.subsystems.Climb;
-import frc.robot.subsystems.Elevator;
-import frc.robot.commands.AlgaeMechCommands;
-import frc.robot.commands.ClimbCommands;
-import frc.robot.commands.CoralMechCommands;
-import frc.robot.commands.ElevatorCommands;
+import frc.robot.subsystems.Drivebase.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Superstructure.Elevator;
+import frc.robot.subsystems.LEDs.LEDs;
+import frc.robot.subsystems.Superstructure.AlgaePivot;
+import frc.robot.subsystems.Superstructure.Climb;
+import frc.robot.subsystems.Superstructure.CoralWrist;
 
 public class RobotContainer {
     private DigitalInput zeroSwitch = new DigitalInput(MiscConstants.zeroSwitchID);
@@ -38,17 +35,17 @@ public class RobotContainer {
             
     private final CommandPS5Controller joystick = new CommandPS5Controller(MiscConstants.controllerID);
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public final CoralMech s_CoralMech = new CoralMech(zeroSwitch);
-    public final AlgaeMech s_AlgaeMech = new AlgaeMech(zeroSwitch);
+    public final CoralWrist s_CoralMech = new CoralWrist(zeroSwitch);
+    public final AlgaePivot s_AlgaeMech = new AlgaePivot(zeroSwitch);
     public final Climb s_Climb = new Climb();
     public final Elevator s_Elevator = new Elevator(zeroSwitch);
+    public final LEDs s_LEDs = new LEDs(s_AlgaeMech);
 
-    @Logged
     private RobotMode currentMode = RobotMode.DRIVING; // Default mode
     private SUBSYSTEMTOTUNE currentTuneSubsystem = SUBSYSTEMTOTUNE.DRIVETRAIN; // Default subsystem
 
     public RobotContainer() {
-        SmartDashboard.putBoolean("Tuning Mode", false);
+        SmartDashboard.putString("RobotMode", currentMode.name());
         configureBindings();
     }
 
@@ -83,18 +80,7 @@ public class RobotContainer {
     }
 
     private void drivingBindings(){
-        //arbitrary bindings, change later depending on driver preferences
-        joystick.square().onTrue(new AlgaeMechCommands(s_AlgaeMech, AlgaeMechCommands.AlgaeCommands.GROUNDINTAKE));
-        joystick.cross().onTrue(new AlgaeMechCommands(s_AlgaeMech, AlgaeMechCommands.AlgaeCommands.REEFINTAKE));
-
-        joystick.L1().onTrue(new ClimbCommands(s_Climb, Climb.ClimbStates.CLIMBUP));
-        joystick.R1().onTrue(new ClimbCommands(s_Climb, Climb.ClimbStates.CLIMBDOWN));
-
-        joystick.triangle().onTrue(new CoralMechCommands(s_CoralMech, CoralMechCommands.CoralCommands.HPINTAKE));
-        joystick.circle().onTrue(new CoralMechCommands(s_CoralMech, CoralMechCommands.CoralCommands.REEFOUTTAKE));
-
-        joystick.L2().onTrue(new ElevatorCommands(s_Elevator, Elevator.ElevatorStates.ELEVATOR_UP));
-        joystick.R2().onTrue(new ElevatorCommands(s_Elevator, Elevator.ElevatorStates.ELEVATOR_DOWN));
+        //configure later
     }
 
     private void tuningBindings() {
@@ -117,10 +103,10 @@ public class RobotContainer {
     
             case ALGAEMECH:
                 // SysID tuning for AlgaeMech Pivot and Flywheel
-                joystick.R1().and(joystick.square()).whileTrue(s_AlgaeMech.algaeSysIdDynamic(Direction.kForward));
-                joystick.R1().and(joystick.triangle()).whileTrue(s_AlgaeMech.algaeSysIdDynamic(Direction.kReverse));
-                joystick.R2().and(joystick.square()).whileTrue(s_AlgaeMech.algaeSysIdQuasistatic(Direction.kForward));
-                joystick.R2().and(joystick.triangle()).whileTrue(s_AlgaeMech.algaeSysIdQuasistatic(Direction.kReverse));
+                joystick.R1().and(joystick.square()).whileTrue(s_AlgaeMech.algaePivotSysIdDynamic(Direction.kForward));
+                joystick.R1().and(joystick.triangle()).whileTrue(s_AlgaeMech.algaePivotSysIdDynamic(Direction.kReverse));
+                joystick.R2().and(joystick.square()).whileTrue(s_AlgaeMech.algaePivotSysIdQuasistatic(Direction.kForward));
+                joystick.R2().and(joystick.triangle()).whileTrue(s_AlgaeMech.algaePivotSysIdQuasistatic(Direction.kReverse));
                 break;
     
             case ELEVATOR:
@@ -138,7 +124,7 @@ public class RobotContainer {
         return Commands.print("No autonomous command configured");
     }
 
-    private enum RobotMode {
+    public enum RobotMode {
         DRIVING, TUNING
     }
 
