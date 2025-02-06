@@ -1,6 +1,6 @@
 # Reefscape Code - One Degree North
 
-This is the repo containing all code for Team 4817's Bot for the 2025 FRC season.
+This is the OLD repo for Team 4817's Bot for the 2025 FRC season.
 
 ## Contact
 
